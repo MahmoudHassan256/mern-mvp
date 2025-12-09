@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { register } from "../api/auth";
 import { useNavigate } from "react-router-dom";
+import "./Auth.css";
 
 function Register() {
   const [name, setName] = useState("");
@@ -12,61 +13,64 @@ function Register() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      navigate("/dashboard");
-    }
-  });
+    if (token) navigate("/dashboard");
+  }, []);
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
+
     try {
       const response = await register({ name, email, password });
-      console.log("Register response", response);
       localStorage.setItem("token", response.data.token);
       window.location.href = "/dashboard";
     } catch (error) {
-      console.error(error);
-      setError(
-        error.response?.data?.message || "Server error. Please try again."
-      );
+      setError(error.response?.data?.message || "Server error.");
     }
   };
+
   return (
-    <div>
-      <h1>Create Account</h1>
-      <form onSubmit={handleRegister}>
+    <div className="auth-page">
+      <h1 className="auth-title">Create Account</h1>
+
+      <form className="auth-form" onSubmit={handleRegister}>
         <div>
-          <label htmlFor="">Name</label>
+          <label>Name</label>
           <input
             type="text"
-            placeholder="Name"
+            placeholder="Your name"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
         </div>
+
         <div>
-          <label htmlFor="">Email</label>
+          <label>Email</label>
           <input
             type="email"
-            placeholder="Email"
+            placeholder="Enter email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
+
         <div>
-          <label htmlFor="">Password</label>
+          <label>Password</label>
           <input
             type="password"
-            placeholder="Password"
+            placeholder="Choose a password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <button type="submit">Register</button>
-                {error && <p style={{ color: "red" }}>{error}</p>}
 
-        <p>
+        <button className="auth-btn" type="submit">
+          Register
+        </button>
+
+        {error && <p className="auth-error">{error}</p>}
+
+        <p className="auth-link">
           Already have an account? <a href="/login">Login</a>
         </p>
       </form>

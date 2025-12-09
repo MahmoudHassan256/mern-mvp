@@ -1,18 +1,26 @@
 import React from "react";
+import "./ItemStyles.css";
 
 function ItemForm({ formData, onFormChange, onSubmit, editingId, onCancel }) {
   return (
-    <div>
-      <h3>{editingId ? "Update Item" : "Add New Item"}</h3>
+    <div className="card">
+      <h3 className="card-title">
+        {editingId ? "Update Item" : "Add New Item"}
+      </h3>
 
-      {editingId && <button onClick={onCancel}>Cancel Edit</button>}
+      {editingId && (
+        <button className="btn btn-secondary" onClick={onCancel}>
+          Cancel Edit
+        </button>
+      )}
 
-      <form onSubmit={onSubmit}>
-        <div>
+      <form onSubmit={onSubmit} className="form">
+        <div className="form-group">
           <label>Title</label>
           <input
             type="text"
             name="title"
+            className="input"
             placeholder="Title"
             value={formData.title}
             onChange={onFormChange}
@@ -20,18 +28,21 @@ function ItemForm({ formData, onFormChange, onSubmit, editingId, onCancel }) {
           />
         </div>
 
-        <div>
+        <div className="form-group">
           <label>Description</label>
           <input
             type="text"
             name="description"
+            className="input"
             placeholder="Description"
             value={formData.description}
             onChange={onFormChange}
           />
         </div>
 
-        <button type="submit">{editingId ? "Update" : "Create"}</button>
+        <button type="submit" className="btn btn-primary">
+          {editingId ? "Update" : "Create"}
+        </button>
       </form>
     </div>
   );

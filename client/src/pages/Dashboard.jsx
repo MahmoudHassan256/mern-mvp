@@ -6,9 +6,9 @@ import {
   createItem,
   deleteItem,
   getAllItems,
-  getItem,
   updateItem,
 } from "../api/items";
+import "./Dashboard.css";
 
 function Dashboard() {
   const [user, setUser] = useState(null);
@@ -17,17 +17,26 @@ function Dashboard() {
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUser = async () => {
       try {
-        const userRes = await me();
-        setUser(userRes.data);
-        const itemRes = await getAllItems();
-        setItems(itemRes.data);
+        const response = await me();
+        setUser(response.data);
       } catch (err) {
-        console.error("Error loading data", err);
+        console.error("Error fetching user:", err);
       }
     };
-    fetchData();
+
+    const fetchItems = async () => {
+      try {
+        const response = await getAllItems();
+        setItems(response.data);
+      } catch (err) {
+        console.error("Error fetching items:", err);
+      }
+    };
+
+    fetchUser();
+    fetchItems();
   }, []);
 
   const handleFormChange = (e) => {
@@ -36,23 +45,24 @@ function Dashboard() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title) return alert("Title is required");
-    try {
-      if (editingId) {
-        const response = await updateItem(editingId, formData);
-        setItems(
-          items.map((item) => (item._id === editingId ? response.data : item))
-        );
-        setEditingId(null);
-      } else {
-        console.log("creating");
-        const response = await createItem(formData);
-        setItems([...items, response.data]);
-      }
-      setFormData({ title: "", description: "" });
-    } catch (err) {
-      console.error("Submit error:", err);
+    if (!formData.title) return;
+
+    if (editingId) {
+      const res = await updateItem(editingId, formData);
+
+      setItems(
+        items.map((item) =>
+          item._id === editingId ? res.data : item
+        )
+      );
+
+      setEditingId(null);
+    } else {
+      const res = await createItem(formData);
+      setItems([...items, res.data]);
     }
+
+    setFormData({ title: "", description: "" });
   };
 
   const handleEdit = (item) => {
@@ -66,12 +76,9 @@ function Dashboard() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Delete this item?")) return;
-    try {
+    if (confirm("Delete this item?")) {
       await deleteItem(id);
       setItems(items.filter((item) => item._id !== id));
-    } catch (err) {
-      console.error("Delete error:", err);
     }
   };
 
@@ -79,22 +86,41 @@ function Dashboard() {
     localStorage.removeItem("token");
     window.location.href = "/login";
   };
+
   return (
-    <div>
-      <h1>Dashboard</h1>
-      {user ? <p>Welcome,{user.name}</p> : <p>Loading...</p>}
-      <button onClick={handleLogout}>Logout</button>
+    <div className="dashboard-container">
 
-      <h2>Manage Items</h2>
+      <header className="dashboard-header">
+        <h1 className="dashboard-title">Dashboard</h1>
 
-      <ItemForm
-        formData={formData}
-        onFormChange={handleFormChange}
-        onSubmit={handleSubmit}
-        editingId={editingId}
-        onCancel={handleCancel}
-      />
-      <ItemList items={items} onEdit={handleEdit} onDelete={handleDelete} />
+        <div className="user-info">
+          {user ? <span>Hello, {user.name}</span> : <span>Loading...</span>}
+          <button className="btn btn-danger" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
+      </header>
+
+      <main className="dashboard-content">
+        <section className="dashboard-section">
+          <ItemForm
+            formData={formData}
+            onFormChange={handleFormChange}
+            onSubmit={handleSubmit}
+            editingId={editingId}
+            onCancel={handleCancel}
+          />
+        </section>
+
+        <section className="dashboard-section">
+          <ItemList
+            items={items}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </section>
+      </main>
+      
     </div>
   );
 }
